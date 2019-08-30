@@ -1,0 +1,50 @@
+---
+apiVersion: kogito.kie.org/v1beta1
+kind: DataModel
+metadata:
+  name: Person
+spec:
+  language: Java
+  package: org.acme.kogito.model
+  fields:
+    - name: name
+      type: java.lang.String
+    - name: age
+      type: int
+    - name: adult
+      type: boolean
+---
+apiVersion: kogito.kie.org/v1beta1
+kind: Drools
+metadata:
+  name: PersonAge
+spec:
+  rule: |
+  package org.acme.kogito
+
+  import org.acme.kogito.model.Person;
+
+
+  rule "Is adult" ruleflow-group "person"
+
+  when
+      $person: Person(age > 18)
+  then
+      modify($person) {
+          setAdult(true)
+      };
+  end
+---
+apiVersion: kogito.kie.org/v1beta1
+kind: HumanTask
+metadata:
+  name: SpecialHandlingForChildren
+---
+apiVersion: kogito.kie.org/v1beta1
+kind: RestService
+metadata:
+  name: GoogleCalendar
+spec:
+  endpoint: api.google.com/mysvc
+  username: x
+  password: y
