@@ -1,11 +1,17 @@
 package org.kiegroup.kogito.serverless.process;
 
+import java.io.StringReader;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.ws.rs.HttpMethod;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonString;
+import javax.json.stream.JsonParser;
 import javax.ws.rs.core.MediaType;
 
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import org.jbpm.process.core.datatype.impl.type.ObjectDataType;
 import org.jbpm.ruleflow.core.RuleFlowProcessFactory;
 import org.jbpm.ruleflow.core.factory.WorkItemNodeFactory;
@@ -16,11 +22,12 @@ import org.kie.kogito.process.impl.AbstractProcess;
 import org.kiegroup.kogito.serverless.Application;
 import org.kiegroup.kogito.serverless.model.JsonModel;
 import org.kiegroup.kogito.serverless.service.WorkflowService;
+import org.kiegroup.kogito.workitem.handler.LifecycleWorkItemHandler;
 import org.kiegroup.kogito.workitem.handler.LogWorkItemHandler;
 import org.kiegroup.kogito.workitem.handler.RestWorkItemHandler;
-import org.kiegroup.kogito.workitem.handler.LifecycleWorkItemHandler;
 import org.serverless.workflow.api.Workflow;
 import org.serverless.workflow.api.actions.Action;
+import org.serverless.workflow.api.filters.Filter;
 import org.serverless.workflow.api.interfaces.State;
 import org.serverless.workflow.api.states.EndState;
 import org.serverless.workflow.api.states.OperationState;
@@ -32,6 +39,8 @@ public class JsonProcess extends AbstractProcess<JsonModel> {
 
     private static final String PACKAGE_NAME = "org.kiegroup.kogito.workflow";
     private static final ObjectDataType JSON_DATA_TYPE = new ObjectDataType(JsonModel.class.getName());
+    private static final ObjectDataType JSON_BACKUP_DATA_TYPE = new ObjectDataType(JsonModel.class.getName());
+    private static final String BACKUP_DATA_VAR = "backup-data";
     private static final String WORKITEM_TYPE = "Type";
     private static final String START_NODE = "Start";
 
@@ -49,6 +58,7 @@ public class JsonProcess extends AbstractProcess<JsonModel> {
         factory.name(getName())
             .packageName(PACKAGE_NAME)
             .variable(JsonModel.DATA_PARAM, JSON_DATA_TYPE)
+            .variable(BACKUP_DATA_VAR, JSON_BACKUP_DATA_TYPE)
             .startNode(nodeCount).name(START_NODE).done();
         NodeRef startNode = new NodeRef(nodeCount++, START_NODE);
         NodeRef nodeRef = startNode;
@@ -104,16 +114,60 @@ public class JsonProcess extends AbstractProcess<JsonModel> {
     }
 
     private NodeRef buildOperationNode(OperationState state, NodeRef nodeRef) {
+        NodeRef newRef = nodeRef;
+        if (state.getFilter() != null) {
+            newRef = buildInputMapping(state.getFilter(), newRef);
+        }
         if (OperationState.ActionMode.SEQUENTIAL.equals(state.getActionMode())) {
-            NodeRef newRef = nodeRef;
             for (Action action : state.getActions()) {
                 newRef = buildAction(action, newRef);
             }
-            return newRef;
         } else {
             //TODO: Provide parallel action-mode
             throw new UnsupportedOperationException("Parallel action-mode not supported");
         }
+        if (state.getFilter() != null) {
+            newRef = buildOutputMapping(state.getFilter(), newRef);
+        }
+        return newRef;
+    }
+
+    private NodeRef buildInputMapping(Filter filter, NodeRef nodeRef) {
+        String name = "input-mapping-" + nodeCount;
+        factory.actionNode(nodeCount)
+            .name(name)
+            .action(kcontext -> {
+                JsonObject data = (JsonObject) kcontext.getVariable(JsonModel.DATA_PARAM);
+                kcontext.setVariable(BACKUP_DATA_VAR, data);
+                Object result = JsonPath.compile(filter.getInputPath()).read(data);
+                kcontext.setVariable(JsonModel.DATA_PARAM, result);
+            }).done();
+        nodeRef.to = new NodeRef(nodeCount++, name);
+        return nodeRef.to;
+    }
+
+    private NodeRef buildOutputMapping(Filter filter, NodeRef nodeRef) {
+        String name = "output-mapping-" + nodeCount;
+        factory.actionNode(nodeCount)
+            .name(name)
+            .action(kcontext -> {
+                //TODO: This implementation is very weak
+                JsonObject data = (JsonObject) kcontext.getVariable(JsonModel.DATA_PARAM);
+                JsonPath resultPath = JsonPath.compile(filter.getResultPath());
+                int lastIdx = filter.getOutputPath().lastIndexOf(".");
+                JsonObject result = data;
+                if(lastIdx != -1) {
+                    JsonObject backup = (JsonObject) kcontext.getVariable(BACKUP_DATA_VAR);
+                    JsonPath outputPath = JsonPath.compile(filter.getOutputPath().substring(0, lastIdx));
+                    String key = filter.getOutputPath().substring(lastIdx + 1);
+                    //TODO: ONLY String values are supported. Enhance
+                    JsonString value = resultPath.read(data);
+                    result = Json.createReader(new StringReader(JsonPath.parse(backup.toString()).put(outputPath, key, value.getString()).jsonString())).readObject();
+                }
+                kcontext.setVariable(JsonModel.DATA_PARAM, result);
+            }).done();
+        nodeRef.to = new NodeRef(nodeCount++, name);
+        return nodeRef.to;
     }
 
     private NodeRef buildAction(Action action, NodeRef nodeRef) {
@@ -143,8 +197,8 @@ public class JsonProcess extends AbstractProcess<JsonModel> {
 
     private void buildRestWorkItem(WorkItemNodeFactory wi, Action action) {
         wi.workParameter(RestWorkItemHandler.PARAM_TASK_NAME, RestWorkItemHandler.HANDLER_NAME)
-            .workParameter(RestWorkItemHandler.PARAM_METHOD, HttpMethod.POST)
             .workParameter(RestWorkItemHandler.PARAM_CONTENT_TYPE, MediaType.APPLICATION_JSON);
+        addWorkParameterFromMetadata(wi, RestWorkItemHandler.PARAM_METHOD, action.getFunction().getMetadata());
         addWorkParameterFromMetadata(wi, RestWorkItemHandler.PARAM_URL, action.getFunction().getMetadata());
         addWorkParameterFromMetadata(wi, RestWorkItemHandler.PARAM_CONTENT_TYPE, action.getFunction().getMetadata());
         //TODO: Implement retry

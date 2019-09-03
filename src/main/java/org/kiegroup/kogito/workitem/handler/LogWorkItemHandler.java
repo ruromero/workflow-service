@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
+import com.jayway.jsonpath.JsonPath;
 import org.kie.api.runtime.process.WorkItem;
 import org.kie.api.runtime.process.WorkItemManager;
 import org.slf4j.Logger;
@@ -20,8 +21,6 @@ public class LogWorkItemHandler implements LifecycleWorkItemHandler {
     public static final String PARAM_MESSAGE = "Message";
     public static final String PARAM_FIELD = "Field";
     public static final String PARAM_LEVEL = "Level";
-    public static final String PARAM_CONTENT_TYPE = "ContentType";
-    public static final String PARAM_RESULT = "Result";
     public static final Level DEFAULT_LEVEL = Level.DEBUG;
 
     @Override
@@ -42,7 +41,7 @@ public class LogWorkItemHandler implements LifecycleWorkItemHandler {
             logger.error(message);
         }
         Map<String, Object> result = new HashMap<>();
-        result.put(PARAM_RESULT, workItem.getParameter(PARAM_CONTENT_TYPE));
+        result.put(PARAM_RESULT, workItem.getParameter(PARAM_CONTENT_DATA));
         manager.completeWorkItem(workItem.getId(), result);
     }
 
@@ -66,13 +65,12 @@ public class LogWorkItemHandler implements LifecycleWorkItemHandler {
     private String parseMessage(WorkItem workItem) {
         JsonObject data = (JsonObject) workItem.getParameter(PARAM_CONTENT_DATA);
         if(workItem.getParameter(PARAM_FIELD) != null) {
-            String field = (String) workItem.getParameter(PARAM_FIELD);
-            String[] path = field.split("\\.");
-            JsonValue result = data;
-            for(int i = 0; i< path.length; i++) {
-                result = getField(result, path[i]);
+            String path = (String) workItem.getParameter(PARAM_FIELD);
+            if(data == null) {
+                logger.warn("data is null. Unable to log field: {}", path);
             }
-            return String.format("%s: %s", workItem.getParameter(PARAM_FIELD), result.toString());
+            Object field = JsonPath.compile(path).read(data);
+            return String.format("%s: %s", workItem.getParameter(PARAM_FIELD), field);
         }
         return (String) workItem.getParameter(PARAM_MESSAGE);
     }

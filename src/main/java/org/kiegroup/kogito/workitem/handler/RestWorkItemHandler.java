@@ -62,16 +62,17 @@ public class RestWorkItemHandler implements LifecycleWorkItemHandler {
 
     @Override
     public void executeWorkItem(WorkItem workItem, WorkItemManager manager) {
-        logger.info("Executing work item {}", workItem);
+        logger.debug("Executing work item {}", workItem);
         Map<String, Object> result = new HashMap<>();
         Invocation.Builder builder = client.target((String) workItem.getParameter(PARAM_URL)).request((String) workItem.getParameter(PARAM_CONTENT_TYPE));
         Response response = null;
-        String method = (String) workItem.getParameter(PARAM_METHOD);
+        JsonObject data = (JsonObject) workItem.getParameter(PARAM_CONTENT_DATA);
+        String method = getHttpMethod(workItem, data);
         if (HttpMethod.GET.equals(method)) {
             response = builder.get();
         } else if (HttpMethod.POST.equals(method)) {
-            JsonObject data = (JsonObject) workItem.getParameter(PARAM_CONTENT_DATA);
             if (data == null) {
+                logger.warn("Trying to send a POST with an empty object");
                 data = Json.createObjectBuilder().build();
             }
             response = builder.post(Entity.entity(data.toString(), (String) workItem.getParameter(PARAM_CONTENT_TYPE)));
@@ -93,5 +94,16 @@ public class RestWorkItemHandler implements LifecycleWorkItemHandler {
     @Override
     public String getName() {
         return HANDLER_NAME;
+    }
+
+    private String getHttpMethod(WorkItem workItem, JsonObject data) {
+        String method = (String) workItem.getParameter(PARAM_METHOD);
+        if(method != null) {
+            return method;
+        }
+        if(data == null) {
+            return HttpMethod.GET;
+        }
+        return HttpMethod.POST;
     }
 }
