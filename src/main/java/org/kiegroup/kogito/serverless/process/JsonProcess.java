@@ -18,7 +18,7 @@ import org.kiegroup.kogito.serverless.model.JsonModel;
 import org.kiegroup.kogito.serverless.service.WorkflowService;
 import org.kiegroup.kogito.workitem.handler.LogWorkItemHandler;
 import org.kiegroup.kogito.workitem.handler.RestWorkItemHandler;
-import org.kiegroup.kogito.workitem.handler.StartupWorkItemHandler;
+import org.kiegroup.kogito.workitem.handler.LifecycleWorkItemHandler;
 import org.serverless.workflow.api.Workflow;
 import org.serverless.workflow.api.actions.Action;
 import org.serverless.workflow.api.interfaces.State;
@@ -127,9 +127,9 @@ public class JsonProcess extends AbstractProcess<JsonModel> {
         nodeRef.to = new NodeRef(nodeCount++, action.getFunction().getName());
         WorkItemNodeFactory wi = factory.workItemNode(nodeRef.to.id)
             .name(nodeRef.to.name)
-            .inMapping(StartupWorkItemHandler.PARAM_CONTENT_DATA, JsonModel.DATA_PARAM)
-            .outMapping(StartupWorkItemHandler.PARAM_RESULT, JsonModel.DATA_PARAM)
-            .workName(action.getFunction().getMetadata().get(StartupWorkItemHandler.PARAM_TYPE));
+            .inMapping(LifecycleWorkItemHandler.PARAM_CONTENT_DATA, JsonModel.DATA_PARAM)
+            .outMapping(LifecycleWorkItemHandler.PARAM_RESULT, JsonModel.DATA_PARAM)
+            .workName(action.getFunction().getMetadata().get(LifecycleWorkItemHandler.PARAM_TYPE));
         if (RestWorkItemHandler.HANDLER_NAME.equals(type)) {
             buildRestWorkItem(wi, action);
         } else if (LogWorkItemHandler.HANDLER_NAME.equals(type)) {

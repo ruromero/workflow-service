@@ -10,11 +10,11 @@ import javax.inject.Singleton;
 import org.kie.kogito.process.impl.DefaultWorkItemHandlerConfig;
 
 @Singleton
-public class LifecycleWorkItemHandlerConfig extends DefaultWorkItemHandlerConfig {
+public class ExtendedWorkItemHandlerConfig extends DefaultWorkItemHandlerConfig {
 
-    protected Map<String, StartupWorkItemHandler> handlers = new HashMap<>();
+    protected Map<String, LifecycleWorkItemHandler> handlers = new HashMap<>();
 
-    public LifecycleWorkItemHandlerConfig() {
+    public ExtendedWorkItemHandlerConfig() {
         handlers.put(RestWorkItemHandler.HANDLER_NAME, new RestWorkItemHandler());
         handlers.put(LogWorkItemHandler.HANDLER_NAME, new LogWorkItemHandler());
         handlers.forEach((k, v) -> this.register(k, v));

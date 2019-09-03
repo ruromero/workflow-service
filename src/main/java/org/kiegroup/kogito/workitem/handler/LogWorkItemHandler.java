@@ -3,27 +3,16 @@ package org.kiegroup.kogito.workitem.handler;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
-import javax.ws.rs.HttpMethod;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.core.Response;
 
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
-import org.jboss.resteasy.client.jaxrs.internal.ResteasyClientBuilderImpl;
 import org.kie.api.runtime.process.WorkItem;
 import org.kie.api.runtime.process.WorkItemManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.event.Level;
 
-public class LogWorkItemHandler implements StartupWorkItemHandler {
+public class LogWorkItemHandler implements LifecycleWorkItemHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(LogWorkItemHandler.class);
 
