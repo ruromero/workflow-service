@@ -33,7 +33,7 @@ public class ProcessResource {
 
     private JsonObject execute(JsonObject data) {
         return UnitOfWorkExecutor.executeInUnitOfWork(application.unitOfWorkManager(), () -> {
-            ProcessInstance<JsonModel> pi = (ProcessInstance<JsonModel>) application.processes().processById(JsonProcess.PROCESS_ID).createInstance(JsonModel.newInstance(data));
+            ProcessInstance<JsonModel> pi = (ProcessInstance<JsonModel>) application.processes().processById(null).createInstance(JsonModel.newInstance(data));
             pi.start();
             if (pi.status() == org.kie.api.runtime.process.ProcessInstance.STATE_ERROR && pi.error().isPresent()) {
                 throw new ProcessInstanceExecutionException(pi.id(), pi.error().get().failedNodeId(), pi.error().get().errorMessage());

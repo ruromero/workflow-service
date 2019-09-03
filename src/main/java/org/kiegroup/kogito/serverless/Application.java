@@ -2,6 +2,7 @@ package org.kiegroup.kogito.serverless;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,8 +24,6 @@ public class Application implements org.kie.kogito.Application {
     @Inject
     WorkflowService workflowService;
 
-    private final Collection<String> processIds = Arrays.asList(JsonProcess.PROCESS_ID);
-
     final Processes processes = new ProcessesImpl();
 
     @Override
@@ -41,15 +40,12 @@ public class Application implements org.kie.kogito.Application {
 
         @Override
         public Process<? extends Model> processById(String processId) {
-            if (JsonProcess.PROCESS_ID.equals(processId)) {
-                return new JsonProcess(Application.this, workflowService).configure();
-            }
-            return null;
+            return new JsonProcess(Application.this, workflowService).configure();
         }
 
         @Override
         public Collection<String> processIds() {
-            return processIds;
+            return Collections.EMPTY_LIST;
         }
     }
 
@@ -57,5 +53,4 @@ public class Application implements org.kie.kogito.Application {
     public Processes processes() {
         return processes;
     }
-
 }
