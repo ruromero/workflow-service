@@ -11,7 +11,8 @@ import org.kie.kogito.Model;
 import org.kie.kogito.process.Process;
 import org.kie.kogito.process.Processes;
 import org.kie.kogito.uow.UnitOfWorkManager;
-import org.kiegroup.kogito.serverless.process.DefaultProcess;
+import org.kiegroup.kogito.serverless.process.JsonProcess;
+import org.kiegroup.kogito.serverless.service.WorkflowService;
 
 @Singleton
 public class Application implements org.kie.kogito.Application {
@@ -19,7 +20,10 @@ public class Application implements org.kie.kogito.Application {
     @Inject
     Config config;
 
-    private final Collection<String> processIds = Arrays.asList(DefaultProcess.PROCESS_NAME);
+    @Inject
+    WorkflowService workflowService;
+
+    private final Collection<String> processIds = Arrays.asList(JsonProcess.PROCESS_ID);
 
     final Processes processes = new ProcessesImpl();
 
@@ -37,8 +41,8 @@ public class Application implements org.kie.kogito.Application {
 
         @Override
         public Process<? extends Model> processById(String processId) {
-            if (DefaultProcess.PROCESS_NAME.equals(processId)) {
-                return new DefaultProcess(Application.this).configure();
+            if (JsonProcess.PROCESS_ID.equals(processId)) {
+                return new JsonProcess(Application.this, workflowService).configure();
             }
             return null;
         }
@@ -48,4 +52,10 @@ public class Application implements org.kie.kogito.Application {
             return processIds;
         }
     }
+
+    @Override
+    public Processes processes() {
+        return processes;
+    }
+
 }

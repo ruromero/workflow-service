@@ -1,0 +1,38 @@
+{
+  "id": "example-workflow",
+  "states": [
+    {
+      "start": true,
+      "type": "OPERATION",
+      "name": "Basic orchestration",
+      "action-mode": "SEQUENTIAL",
+      "actions": [
+        {
+          "function": {
+            "name": "Set adult",
+            "metadata": {
+              "Type": "Rest",
+              "Url": "http://localhost:8080/age"
+            }
+          }
+        },
+        {
+          "function": {
+            "name": "Log is adult",
+            "metadata": {
+              "Type": "Log",
+              "Field": "$.adult",
+              "Level": "INFO"
+            }
+          }
+        }
+      ],
+      "next-state": "end"
+    },
+    {
+      "status": "SUCCESS",
+      "name": "end",
+      "type": "END"
+    }
+  ]
+}
