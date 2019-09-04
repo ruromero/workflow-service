@@ -7,9 +7,9 @@ import org.kie.kogito.process.impl.AbstractProcess;
 import org.kie.kogito.process.impl.AbstractProcessInstance;
 import org.kiegroup.kogito.serverless.model.JsonModel;
 
-public class JsonProcessInstance extends AbstractProcessInstance<JsonModel> {
+public class WorkflowProcessInstance extends AbstractProcessInstance<JsonModel> {
 
-    public JsonProcessInstance(AbstractProcess<JsonModel> process, JsonModel variables, ProcessRuntime processRuntime) {
+    public WorkflowProcessInstance(AbstractProcess<JsonModel> process, JsonModel variables, ProcessRuntime processRuntime) {
         super(process, variables, processRuntime);
     }
 

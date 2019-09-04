@@ -1,30 +1,35 @@
 package org.kiegroup.kogito.serverless.process;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.kie.api.definition.process.Process;
+import org.kie.kogito.Config;
 import org.kie.kogito.Model;
 import org.kie.kogito.process.ProcessInstance;
 import org.kie.kogito.process.impl.AbstractProcess;
-import org.kiegroup.kogito.serverless.Application;
 import org.kiegroup.kogito.serverless.model.JsonModel;
 import org.kiegroup.kogito.serverless.service.WorkflowService;
 
-public class JsonProcess extends AbstractProcess<JsonModel> {
+@Singleton
+public class WorkflowProcess extends AbstractProcess<JsonModel> {
 
-    private ProcessBuilder processBuilder;
+    @Inject
+    WorkflowService workflowService;
 
-    public JsonProcess(Application application, WorkflowService workflowService) {
-        super(application.config().process());
-        this.processBuilder = new ProcessBuilder(workflowService.get());
+    @Inject
+    public WorkflowProcess(Config config) {
+        super(config.process());
     }
 
     @Override
     public Process legacyProcess() {
-        return processBuilder.getProcess();
+        return workflowService.getProcess();
     }
 
     @Override
     public ProcessInstance<JsonModel> createInstance(JsonModel value) {
-        return new JsonProcessInstance(this, value, this.createLegacyProcessRuntime());
+        return new WorkflowProcessInstance(this, value, this.createLegacyProcessRuntime());
     }
 
     @Override

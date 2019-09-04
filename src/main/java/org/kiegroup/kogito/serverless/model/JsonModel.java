@@ -3,6 +3,7 @@ package org.kiegroup.kogito.serverless.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.json.Json;
 import javax.json.JsonObject;
 
 import org.kie.kogito.Model;
@@ -14,8 +15,9 @@ public class JsonModel implements Model {
     private String id;
     private JsonObject data;
 
-    public void setId(String id) {
+    public JsonModel setId(String id) {
         this.id = id;
+        return this;
     }
 
     public String getId() {
@@ -46,6 +48,9 @@ public class JsonModel implements Model {
 
     public static JsonModel newInstance(JsonObject data) {
         JsonModel jsonModel = new JsonModel();
+        if(data == null) {
+            data = JsonObject.EMPTY_JSON_OBJECT;
+        }
         jsonModel.data = data;
         return jsonModel;
     }

@@ -26,5 +26,4 @@ public class BasicWorkflowValidationTest {
         Assertions.assertNotNull(validator);
         Assertions.assertEquals(0, validator.validate().size());
     }
-
 }
