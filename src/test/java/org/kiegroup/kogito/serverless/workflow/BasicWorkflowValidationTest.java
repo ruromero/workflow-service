@@ -3,11 +3,6 @@ package org.kiegroup.kogito.serverless.workflow;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.serverless.workflow.api.Workflow;

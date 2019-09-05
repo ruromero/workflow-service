@@ -35,6 +35,7 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     private Workflow workflow;
     private Process process;
+    private String processId;
     private final WorkflowObjectMapper mapper = new WorkflowObjectMapper();
 
     @ConfigProperty(
@@ -72,6 +73,11 @@ public class WorkflowServiceImpl implements WorkflowService {
         return process;
     }
 
+    @Override
+    public String getProcessId() {
+        return processId;
+    }
+
     private void setFileBasedWorkflow() {
         if (!filePath.isPresent()) {
             throw new IllegalArgumentException("Missing required environment variable for File based workflow definition: " + ENV_FILE_WORKFLOW_PATH);
@@ -96,7 +102,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     private void updateWorkflow(Workflow workflow) {
         this.workflow = workflow;
-        this.process = new ProcessBuilder(workflow).getProcess();
+        ProcessBuilder builder = new ProcessBuilder(workflow);
+        this.process = builder.getProcess();
+        this.processId = builder.getProcessId();
     }
 
     private void setK8sBasedWorkflow() {

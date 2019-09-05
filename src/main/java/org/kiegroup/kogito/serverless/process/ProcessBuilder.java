@@ -1,15 +1,11 @@
 package org.kiegroup.kogito.serverless.process;
 
-import java.io.StringReader;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.json.Json;
 import javax.json.JsonObject;
-import javax.json.JsonString;
 import javax.ws.rs.core.MediaType;
 
-import com.jayway.jsonpath.JsonPath;
 import org.jbpm.process.core.datatype.impl.type.ObjectDataType;
 import org.jbpm.ruleflow.core.RuleFlowProcessFactory;
 import org.jbpm.ruleflow.core.factory.WorkItemNodeFactory;
@@ -19,6 +15,7 @@ import org.kiegroup.kogito.serverless.model.NodeRef;
 import org.kiegroup.kogito.workitem.handler.LifecycleWorkItemHandler;
 import org.kiegroup.kogito.workitem.handler.LogWorkItemHandler;
 import org.kiegroup.kogito.workitem.handler.RestWorkItemHandler;
+import org.kiegroup.kogito.workitem.handler.utils.JsonPath;
 import org.serverless.workflow.api.Workflow;
 import org.serverless.workflow.api.actions.Action;
 import org.serverless.workflow.api.filters.Filter;
@@ -41,10 +38,13 @@ public class ProcessBuilder {
     final Workflow workflow;
     final RuleFlowProcessFactory factory;
     final NodeRefBuilder refBuilder = new NodeRefBuilder();
+    final String processId;
+    final JsonPath jsonPath = new JsonPath();
 
     public ProcessBuilder(Workflow workflow) {
         this.workflow = workflow;
-        this.factory = RuleFlowProcessFactory.createProcess(Optional.ofNullable(workflow.getId()).orElse(PROCESS_ID))
+        this.processId = Optional.ofNullable(workflow.getId()).orElse(PROCESS_ID);
+        this.factory = RuleFlowProcessFactory.createProcess(processId)
             .name(Optional.ofNullable(workflow.getName()).orElse(PROCESS_NAME))
             .packageName(PACKAGE_NAME)
             .variable(JsonModel.DATA_PARAM, JSON_DATA_TYPE)
@@ -57,6 +57,10 @@ public class ProcessBuilder {
 
     public Process getProcess() {
         return factory.getProcess();
+    }
+
+    public String getProcessId() {
+        return this.processId;
     }
 
     private void buildStartNode() {
@@ -121,7 +125,7 @@ public class ProcessBuilder {
             .action(kcontext -> {
                 JsonObject data = (JsonObject) kcontext.getVariable(JsonModel.DATA_PARAM);
                 kcontext.setVariable(BACKUP_DATA_VAR, data);
-                Object result = JsonPath.compile(filter.getInputPath()).read(data);
+                Object result = jsonPath.filter(data, filter.getInputPath());
                 kcontext.setVariable(JsonModel.DATA_PARAM, result);
             }).done();
     }
@@ -131,20 +135,11 @@ public class ProcessBuilder {
         factory.actionNode(ref.getId())
             .name(ref.getName())
             .action(kcontext -> {
-                //TODO: This implementation is very weak
                 JsonObject data = (JsonObject) kcontext.getVariable(JsonModel.DATA_PARAM);
-                JsonPath resultPath = JsonPath.compile(filter.getResultPath());
-                int lastIdx = filter.getOutputPath().lastIndexOf(".");
-                JsonObject result = data;
-                if (lastIdx != -1) {
-                    JsonObject backup = (JsonObject) kcontext.getVariable(BACKUP_DATA_VAR);
-                    JsonPath outputPath = JsonPath.compile(filter.getOutputPath().substring(0, lastIdx));
-                    String key = filter.getOutputPath().substring(lastIdx + 1);
-                    //TODO: ONLY String values are supported. Enhance
-                    JsonString value = resultPath.read(data);
-                    result = Json.createReader(new StringReader(JsonPath.parse(backup.toString()).put(outputPath, key, value.getString()).jsonString())).readObject();
-                }
-                kcontext.setVariable(JsonModel.DATA_PARAM, result);
+                Object result = jsonPath.filter(data, filter.getResultPath());
+                JsonObject backup = (JsonObject) kcontext.getVariable(BACKUP_DATA_VAR);
+                JsonObject newData = jsonPath.set(backup, filter.getOutputPath(), result);
+                kcontext.setVariable(JsonModel.DATA_PARAM, newData);
             }).done();
     }
 

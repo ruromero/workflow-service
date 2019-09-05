@@ -21,7 +21,7 @@ import org.kie.kogito.services.uow.UnitOfWorkExecutor;
 import org.kiegroup.kogito.serverless.model.JsonModel;
 import org.kiegroup.kogito.serverless.process.WorkflowProcess;
 
-@Path("/")
+@Path("/process")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ProcessResource {

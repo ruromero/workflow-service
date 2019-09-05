@@ -8,4 +8,6 @@ public interface WorkflowService {
     Workflow get();
 
     Process getProcess();
+
+    String getProcessId();
 }

@@ -11,7 +11,6 @@
     <kogito.version>0.3.0</kogito.version>
     <quarkus.version>0.21.1</quarkus.version>
     <workflow-api.version>1.0-SNAPSHOT</workflow-api.version>
-    <json-path.version>2.4.0</json-path.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.target>1.8</maven.compiler.target>
@@ -51,21 +50,12 @@
         <artifactId>workflow-api</artifactId>
         <version>${workflow-api.version}</version>
       </dependency>
-      <dependency>
-        <groupId>com.jayway.jsonpath</groupId>
-        <artifactId>json-path</artifactId>
-        <version>${json-path.version}</version>
-      </dependency>
     </dependencies>
   </dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>org.servlerless</groupId>
       <artifactId>workflow-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.jayway.jsonpath</groupId>
-      <artifactId>json-path</artifactId>
     </dependency>
     <dependency>
       <groupId>org.kie.kogito</groupId>

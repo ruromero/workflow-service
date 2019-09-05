@@ -34,7 +34,9 @@ public class NodeRef {
 
     public NodeRef setTo(NodeRef to) {
         this.to = to;
-        this.to.from = this;
+        if(to != null) {
+            this.to.from = this;
+        }
         return this;
     }
 
