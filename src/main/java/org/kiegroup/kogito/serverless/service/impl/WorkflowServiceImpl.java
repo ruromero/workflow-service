@@ -13,8 +13,7 @@ import javax.enterprise.event.Observes;
 import io.quarkus.runtime.StartupEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.kie.api.definition.process.Process;
-import org.kiegroup.kogito.serverless.model.JsonModel;
-import org.kiegroup.kogito.serverless.process.ProcessBuilder;
+import org.kiegroup.kogito.serverless.model.Graph;
 import org.kiegroup.kogito.serverless.service.WorkflowService;
 import org.serverless.workflow.api.Workflow;
 import org.serverless.workflow.api.mapper.WorkflowObjectMapper;
@@ -34,6 +33,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     private static final String SOURCE_K8S = "k8s";
 
     private Workflow workflow;
+    private Graph graph;
     private Process process;
     private String processId;
     private final WorkflowObjectMapper mapper = new WorkflowObjectMapper();
@@ -102,9 +102,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     private void updateWorkflow(Workflow workflow) {
         this.workflow = workflow;
-        ProcessBuilder builder = new ProcessBuilder(workflow);
-        this.process = builder.getProcess();
-        this.processId = builder.getProcessId();
+        this.graph = new Graph(workflow);
+        this.process = graph.getProcess();
+        this.processId = graph.getProcessId();
     }
 
     private void setK8sBasedWorkflow() {

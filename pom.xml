@@ -9,7 +9,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <surefire-plugin.version>2.22.0</surefire-plugin.version>
     <kogito.version>0.3.0</kogito.version>
-    <quarkus.version>0.21.1</quarkus.version>
+    <quarkus.version>0.21.2</quarkus.version>
     <workflow-api.version>1.0-SNAPSHOT</workflow-api.version>
     <maven.compiler.source>1.8</maven.compiler.source>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
