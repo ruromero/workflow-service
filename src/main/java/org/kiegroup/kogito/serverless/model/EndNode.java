@@ -34,7 +34,9 @@ class EndNode extends GraphNode {
     }
 
     private void buildInputFilter(EndNodeFactory nodeFactory) {
-        nodeFactory.action(kcontext -> buildInputAction(kcontext, state.getFilter()));
+        if (this.getState().getFilter() != null && this.getState().getFilter().getInputPath() != null) {
+            nodeFactory.action(kcontext -> buildInputAction(kcontext, state.getFilter()));
+        }
     }
 
     @Override

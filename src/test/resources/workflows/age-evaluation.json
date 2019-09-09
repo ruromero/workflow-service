@@ -17,7 +17,7 @@
           }
         }
       ],
-      "next-state": "Calculate country code"
+      "next-state": "Only adults allowed"
     },
     {
       "name": "Only adults allowed",
@@ -27,10 +27,46 @@
           "path": "$.adult",
           "value": true,
           "operator": "EQ",
-          "next-state": "Allow access"
+          "next-state": "Log allowed"
         }
       ],
-      "default": "Access not allowed"
+      "default": "Log not allowed"
+    },
+    {
+      "type": "OPERATION",
+      "name": "Log allowed",
+      "action-mode": "SEQUENTIAL",
+      "actions": [
+        {
+          "function": {
+            "name": "Log user is adult",
+            "metadata": {
+              "Type": "Log",
+              "Field": "$.adult",
+              "Level": "INFO"
+            }
+          }
+        }
+      ],
+      "next-state": "Allow access"
+    },
+    {
+      "type": "OPERATION",
+      "name": "Log not allowed",
+      "action-mode": "SEQUENTIAL",
+      "actions": [
+        {
+          "function": {
+            "name": "User is NOT adult",
+            "metadata": {
+              "Type": "Log",
+              "Field": "$.name",
+              "Level": "ERROR"
+            }
+          }
+        }
+      ],
+      "next-state": "Access not allowed"
     },
     {
       "status": "SUCCESS",

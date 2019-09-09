@@ -11,6 +11,7 @@ import javax.json.JsonValue;
 
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Value;
+import org.serverless.workflow.api.choices.DefaultChoice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +58,14 @@ public class JsonPath {
         throw new IllegalArgumentException("The resulting value is not a JsonObject. Path: " + path);
     }
 
+    public Boolean eval(JsonObject object, String path, Object value, DefaultChoice.Operator operator) {
+        Object target = filter(object, path);
+        Value function = context.eval("js", "(data, value) => {" +
+            " return data " + parseBinaryOperator(operator) + " value;" +
+        "}");
+        return function.execute(target.toString(), value).asBoolean();
+    }
+
     private Object getValue(JsonValue value) {
         switch (value.getValueType()) {
             case TRUE:
@@ -81,4 +90,22 @@ public class JsonPath {
                 throw new IllegalArgumentException("Unsupported JsonValue type: " + value.getValueType());
         }
     }
+
+    private String parseBinaryOperator(DefaultChoice.Operator operator) {
+        switch (operator) {
+            case EQ:
+                return "==";
+            case GT:
+                return ">";
+            case LT:
+                return "<";
+            case GTEQ:
+                return ">=";
+            case LTEQ:
+                return "<=";
+            default:
+                throw new UnsupportedOperationException("String operators not supported");
+        }
+    }
+
 }

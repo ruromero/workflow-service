@@ -26,10 +26,11 @@ public class Graph {
 
     private final Map<String, GraphNode> nodes = new HashMap<>();
     private final RuleFlowProcessFactory factory;
+    private final String processId;
     private Long count = 0l;
 
     public Graph(Workflow workflow) {
-        String processId = Optional.ofNullable(workflow.getId()).orElse(PROCESS_ID);
+        this.processId = Optional.ofNullable(workflow.getId()).orElse(PROCESS_ID);
         this.factory = RuleFlowProcessFactory.createProcess(processId)
             .name(Optional.ofNullable(workflow.getName()).orElse(PROCESS_NAME))
             .packageName(PACKAGE_NAME)
@@ -46,6 +47,10 @@ public class Graph {
         nodes.values().forEach(node -> node.build(factory));
         nodes.values().forEach(node -> node.connectNextState(factory));
         return factory.validate().getProcess();
+    }
+
+    public String getProcessId() {
+        return processId;
     }
 
     private void readState(State state) {

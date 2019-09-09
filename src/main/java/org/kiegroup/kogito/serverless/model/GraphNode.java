@@ -11,8 +11,8 @@ import org.serverless.workflow.api.interfaces.State;
 
 public abstract class GraphNode {
 
-    private final JsonPath jsonPath = new JsonPath();
-    private final Graph graph;
+    final JsonPath jsonPath = new JsonPath();
+    final Graph graph;
     private final Long headerId;
     private Long id = null;
 
@@ -41,7 +41,7 @@ public abstract class GraphNode {
 
     void connect(RuleFlowProcessFactory factory, Long from, Long to) {
         if(from != null && to != null) {
-            factory.connection(from, to);
+            factory.connection(from, to, "Flow_" + from + "_" + to);
         }
     }
 

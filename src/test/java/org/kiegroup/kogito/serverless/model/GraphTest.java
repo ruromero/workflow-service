@@ -98,6 +98,12 @@ class GraphTest {
         assertNotNull(graph.getProcess());
     }
 
+    @Test
+    void testAgeEvaluationProcess() {
+        Graph graph = load("age-evaluation.json");
+        assertNotNull(graph.getProcess());
+    }
+
     private Graph load(String name) {
         InputStream is = this.getClass().getClassLoader().getResourceAsStream("workflows/" + name);
         Workflow workflow = null;
