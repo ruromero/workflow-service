@@ -9,6 +9,7 @@ import javax.ws.rs.core.MediaType;
 import org.jbpm.process.core.datatype.impl.type.ObjectDataType;
 import org.jbpm.ruleflow.core.RuleFlowProcessFactory;
 import org.jbpm.ruleflow.core.factory.WorkItemNodeFactory;
+import org.jbpm.workflow.core.node.Split;
 import org.kie.api.definition.process.Process;
 import org.kiegroup.kogito.serverless.model.JsonModel;
 import org.kiegroup.kogito.serverless.model.NodeRef;
@@ -22,6 +23,7 @@ import org.serverless.workflow.api.filters.Filter;
 import org.serverless.workflow.api.interfaces.State;
 import org.serverless.workflow.api.states.EndState;
 import org.serverless.workflow.api.states.OperationState;
+import org.serverless.workflow.api.states.SwitchState;
 
 public class ProcessBuilder {
 
@@ -78,6 +80,9 @@ public class ProcessBuilder {
             case END:
                 buildEndNode((EndState) state);
                 break;
+            case SWITCH:
+                buildSwitchNode((SwitchState) state);
+                break;
             default:
                 //TODO: Implement SWITCH, EVENT, DELAY
                 throw new UnsupportedOperationException("state not supported: " + state.getType());
@@ -107,6 +112,14 @@ public class ProcessBuilder {
         if (state.getFilter() != null) {
             buildOutputMapping(state.getFilter());
         }
+    }
+
+    private void buildSwitchNode(SwitchState state) {
+        NodeRef ref = refBuilder.to(state.getName());
+        factory.splitNode(ref.getId())
+            .name(ref.getName())
+            //TODO: Constraints
+            .done();
     }
 
     private void buildEndNode(EndState state) {

@@ -1,0 +1,46 @@
+{
+  "id": "example-workflow",
+  "states": [
+    {
+      "start": true,
+      "type": "OPERATION",
+      "name": "Calculate user is an adult",
+      "action-mode": "SEQUENTIAL",
+      "actions": [
+        {
+          "function": {
+            "name": "Set adult",
+            "metadata": {
+              "Type": "Rest",
+              "Url": "http://localhost:8080/age"
+            }
+          }
+        }
+      ],
+      "next-state": "Calculate country code"
+    },
+    {
+      "name": "Only adults allowed",
+      "type": "SWITCH",
+      "choices": [
+        {
+          "path": "$.adult",
+          "value": true,
+          "operator": "EQ",
+          "next-state": "Allow access"
+        }
+      ],
+      "default": "Access not allowed"
+    },
+    {
+      "status": "SUCCESS",
+      "name": "Allow access",
+      "type": "END"
+    },
+    {
+      "status": "FAILURE",
+      "name": "Access not allowed",
+      "type": "END"
+    }
+  ]
+}
