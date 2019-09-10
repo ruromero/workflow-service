@@ -104,7 +104,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         this.workflow = workflow;
         this.graph = new Graph(workflow);
         this.process = graph.getProcess();
-        this.processId = graph.getProcessId();
+        this.processId = graph.getProcessName();
     }
 
     private void setK8sBasedWorkflow() {

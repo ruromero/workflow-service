@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.kie.kogito</groupId>
   <artifactId>serverless-wf</artifactId>
@@ -8,12 +8,12 @@
   <properties>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <surefire-plugin.version>2.22.0</surefire-plugin.version>
-    <kogito.version>0.3.0</kogito.version>
-    <quarkus.version>0.21.2</quarkus.version>
     <workflow-api.version>1.0-SNAPSHOT</workflow-api.version>
-    <maven.compiler.source>1.8</maven.compiler.source>
+    <quarkus.version>0.21.2</quarkus.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <kogito.version>0.3.0</kogito.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -77,7 +77,6 @@
       <groupId>org.kie.kogito</groupId>
       <artifactId>jbpm-bpmn2</artifactId>
     </dependency>
-    <!-- Quarkus dependencies -->
     <dependency>
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy-jsonb</artifactId>
@@ -85,6 +84,10 @@
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-jackson</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>

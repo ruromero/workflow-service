@@ -1,5 +1,5 @@
 {
-  "id": "example-workflow",
+  "name": "example-workflow",
   "states": [
     {
       "start": true,
