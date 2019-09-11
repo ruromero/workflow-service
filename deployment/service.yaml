@@ -2,6 +2,8 @@ kind: Service
 apiVersion: v1
 metadata:
   name: workflow-service
+  labels:
+    app: workflow-service
 spec:
   selector:
     deployment: workflow-service

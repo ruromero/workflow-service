@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: workflow-service
-  lagels:
+  labels:
     app: workflow-service
   annotations:
     nginx.ingress.kubernetes.io/app-root: /process
