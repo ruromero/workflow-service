@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: workflow-service
+  name: workflow-service
+spec:
+  selector:
+    matchLabels:
+      deployment: workflow-service
+      app: workflow-service
+  template:
+    metadata:
+      labels:
+        app: workflow-service
+        deployment: workflow-service
+    spec:
+      containers:
+        - env:
+            - name: WORKFLOW_PATH
+              value: /opt/workflows/workflow.json
+          image: quay.io/ruben/workflow-service:latest
+          imagePullPolicy: Always
+          name: workflow-service
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /opt/workflows
+              name: workflow
+      volumes:
+        - configMap:
+            defaultMode: 420
+            name: example-workflow
+          name: workflow
+
