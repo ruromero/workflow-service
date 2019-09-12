@@ -1,5 +1,6 @@
 package org.kiegroup.kogito.workitem.handler;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -68,27 +69,32 @@ public class RestWorkItemHandler implements LifecycleWorkItemHandler {
         Response response = null;
         JsonObject data = (JsonObject) workItem.getParameter(PARAM_CONTENT_DATA);
         String method = getHttpMethod(workItem, data);
-        if (HttpMethod.GET.equals(method)) {
-            response = builder.get();
-        } else if (HttpMethod.POST.equals(method)) {
-            if (data == null) {
-                logger.warn("Trying to send a POST with an empty object");
-                data = Json.createObjectBuilder().build();
+        try {
+            if (HttpMethod.GET.equals(method)) {
+                response = builder.get();
+            } else if (HttpMethod.POST.equals(method)) {
+                if (data == null) {
+                    logger.warn("Trying to send a POST with an empty object");
+                    data = Json.createObjectBuilder().build();
+                }
+                response = builder.post(Entity.entity(data.toString(), (String) workItem.getParameter(PARAM_CONTENT_TYPE)));
+            } else {
+                logger.info("Unsupported method: {}", method);
             }
-            response = builder.post(Entity.entity(data.toString(), (String) workItem.getParameter(PARAM_CONTENT_TYPE)));
+        } catch (Exception e) {
+            logger.info("Unable to perform HTTP Request", e);
+        }
+        if (response != null && response.getStatus() >= Response.Status.OK.getStatusCode() &&
+            response.getStatus() < Response.Status.BAD_REQUEST.getStatusCode()) {
+            manager.completeWorkItem(workItem.getId(),
+                                     Collections.singletonMap(PARAM_RESULT, response.readEntity(JsonObject.class)));
         } else {
-            logger.info("Unsupported method: {}", method);
+            manager.abortWorkItem(workItem.getId());
         }
-        if (response != null) {
-            result.put(PARAM_RESULT, response.readEntity(JsonObject.class));
-        }
-        manager.completeWorkItem(workItem.getId(), result);
     }
 
     @Override
     public void abortWorkItem(WorkItem workItem, WorkItemManager manager) {
-        logger.info("Aborting work item {}", workItem);
-        manager.abortWorkItem(workItem.getId());
     }
 
     @Override
@@ -98,10 +104,10 @@ public class RestWorkItemHandler implements LifecycleWorkItemHandler {
 
     private String getHttpMethod(WorkItem workItem, JsonObject data) {
         String method = (String) workItem.getParameter(PARAM_METHOD);
-        if(method != null) {
+        if (method != null) {
             return method;
         }
-        if(data == null) {
+        if (data == null) {
             return HttpMethod.GET;
         }
         return HttpMethod.POST;

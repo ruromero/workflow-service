@@ -32,6 +32,9 @@ public class JsonPath {
 
     public Object filter(JsonObject object, String path) {
         String value = filterAsString(object, path);
+        if(value == null) {
+            return JsonObject.NULL;
+        }
         JsonValue jsonValue = Json.createReader(new StringReader(value)).readValue();
         return getValue(jsonValue);
     }

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.jbpm.process.core.datatype.impl.type.ObjectDataType;
+import org.jbpm.process.core.datatype.impl.type.StringDataType;
 import org.jbpm.ruleflow.core.RuleFlowProcessFactory;
 import org.kie.api.definition.process.Process;
 import org.serverless.workflow.api.Workflow;
@@ -18,11 +19,12 @@ public class Graph {
     public static final String BACKUP_DATA_VAR = "backup-data";
 
     private static final String PROCESS_ID = "default-workflow";
-    private static final String PROCESS_NAME = "Default workflow";
     private static final String PACKAGE_NAME = "org.kiegroup.kogito.workflow";
+    private static final Boolean DYNAMIC = Boolean.TRUE;
+    private static final String VISIBILITY = "Public";
+    private static final String VERSION = "1.0";
 
     private static final ObjectDataType JSON_DATA_TYPE = new ObjectDataType(JsonModel.class.getName());
-    private static final ObjectDataType JSON_BACKUP_DATA_TYPE = new ObjectDataType(JsonModel.class.getName());
 
     private final Map<String, GraphNode> nodes = new HashMap<>();
     private final RuleFlowProcessFactory factory;
@@ -34,8 +36,11 @@ public class Graph {
         this.factory = RuleFlowProcessFactory.createProcess(processName)
             .name(processName)
             .packageName(PACKAGE_NAME)
+            .dynamic(DYNAMIC)
+            .visibility(VISIBILITY)
+            .version(VERSION)
             .variable(JsonModel.DATA_PARAM, JSON_DATA_TYPE)
-            .variable(BACKUP_DATA_VAR, JSON_BACKUP_DATA_TYPE);
+            .variable(BACKUP_DATA_VAR, JSON_DATA_TYPE);
         workflow.getStates().forEach(this::readState);
     }
 
