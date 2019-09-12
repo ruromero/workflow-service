@@ -11,9 +11,11 @@ import org.kie.kogito.Model;
 public class JsonModel implements Model {
 
     public static final String DATA_PARAM = "data";
+    public static final String STATUS_PARAM = "status";
 
     private String id;
     private JsonObject data;
+    private String status;
 
     public JsonModel setId(String id) {
         this.id = id;
@@ -28,10 +30,15 @@ public class JsonModel implements Model {
         return data;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
     @Override
     public Map<String, Object> toMap() {
         Map<String, Object> params = new HashMap<>();
         params.put(DATA_PARAM, data);
+        params.put(STATUS_PARAM, status);
         return params;
     }
 
@@ -39,11 +46,13 @@ public class JsonModel implements Model {
     public void fromMap(Map<String, Object> params) {
         this.id = null;
         this.data = (JsonObject) params.get(DATA_PARAM);
+        this.status = (String) params.get(STATUS_PARAM);
     }
 
     public void fromMap(String id, Map<String, Object> params) {
         this.id = id;
         this.data = (JsonObject) params.get(DATA_PARAM);
+        this.status = (String) params.get(STATUS_PARAM);
     }
 
     public static JsonModel newInstance(JsonObject data) {

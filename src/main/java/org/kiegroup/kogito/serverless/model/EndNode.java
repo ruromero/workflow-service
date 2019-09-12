@@ -28,7 +28,10 @@ class EndNode extends GraphNode {
         if (state.getFilter() != null && state.getFilter().getInputPath() != null) {
             buildInputFilter(end);
         }
-        end.terminate(EndState.Status.SUCCESS.equals(state.getStatus()))
+        end.terminate(false)
+            .action(kcontext -> {
+                kcontext.setVariable(JsonModel.STATUS_PARAM, state.getStatus().name());
+            })
             .done();
         connect(factory, prevId, id);
     }
