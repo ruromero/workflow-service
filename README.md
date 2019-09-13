@@ -39,13 +39,13 @@ java -jar target/serverless-wf-1.0-SNAPSHOT-runner.jar
 
 # Deploy on Kubernetes
 
-The [deployment](./deployment) folder contains a `deployment.yaml` file with 
+The [deploy](deploy) folder contains a `deployment.yaml` file with 
 a predefined environment variable and a volume mounting a configmap.
 
 The configmap can be created using the following command:
 
 ```shell script
-$ kubectl create cm --from-file workflow.json=deployment/examples/age-evaluation.json workflow-service
+$ kubectl create cm --from-file workflow.json=deploy/examples/age-evaluation.json workflow-service
 configmap/workflow-service created
 ```
 
@@ -58,7 +58,7 @@ configmap/workflow-service labeled
 The other resources can be created all together:
 
 ```shell script
-$ kubectl create -f deployment       
+$ kubectl create -f deploy    
 deployment.extensions/workflow-service created
 ingress.networking.k8s.io/workflow-service created
 service/workflow-service created

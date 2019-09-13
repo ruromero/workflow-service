@@ -15,10 +15,13 @@ spec:
         app: workflow-service
         deployment: workflow-service
     spec:
+      serviceAccountName: workflow-service
       containers:
         - env:
-            - name: WORKFLOW_PATH
-              value: /opt/workflows/workflow.json
+            - name: WORKFLOW_NAME
+              value: workflow-service
+            - name: WORKFLOW_SOURCE
+              value: k8s
           image: quay.io/ruben/workflow-service:latest
           imagePullPolicy: Always
           name: workflow-service
@@ -26,12 +29,3 @@ spec:
             - name: http
               containerPort: 8080
               protocol: TCP
-          volumeMounts:
-            - mountPath: /opt/workflows
-              name: workflow
-      volumes:
-        - configMap:
-            defaultMode: 420
-            name: example-workflow
-          name: workflow
-

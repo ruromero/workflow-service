@@ -51,6 +51,16 @@
         <artifactId>workflow-api</artifactId>
         <version>${workflow-api.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.graalvm.truffle</groupId>
+        <artifactId>truffle-api</artifactId>
+        <version>${graalvm.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.graalvm.js</groupId>
+        <artifactId>js</artifactId>
+        <version>${graalvm.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <dependencies>
@@ -85,6 +95,10 @@
     <dependency>
       <groupId>org.jboss.resteasy</groupId>
       <artifactId>resteasy-client</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-kubernetes-client</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -132,20 +146,6 @@
       <activation>
         <activeByDefault>true</activeByDefault>
       </activation>
-      <dependencyManagement>
-        <dependencies>
-          <dependency>
-            <groupId>org.graalvm.truffle</groupId>
-            <artifactId>truffle-api</artifactId>
-            <version>${graalvm.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js</artifactId>
-            <version>${graalvm.version}</version>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
       <dependencies>
         <dependency>
           <groupId>org.graalvm.truffle</groupId>

@@ -25,6 +25,7 @@ public class Graph {
     private static final String VERSION = "1.0";
 
     private static final ObjectDataType JSON_DATA_TYPE = new ObjectDataType(JsonModel.class.getName());
+    private static final StringDataType STRING_DATA_TYPE = new StringDataType();
 
     private final Map<String, GraphNode> nodes = new HashMap<>();
     private final RuleFlowProcessFactory factory;
@@ -40,7 +41,8 @@ public class Graph {
             .visibility(VISIBILITY)
             .version(VERSION)
             .variable(JsonModel.DATA_PARAM, JSON_DATA_TYPE)
-            .variable(BACKUP_DATA_VAR, JSON_DATA_TYPE);
+            .variable(BACKUP_DATA_VAR, JSON_DATA_TYPE)
+            .variable(JsonModel.STATUS_PARAM, STRING_DATA_TYPE);
         workflow.getStates().forEach(this::readState);
     }
 

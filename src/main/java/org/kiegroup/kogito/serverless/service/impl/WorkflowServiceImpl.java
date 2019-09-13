@@ -1,24 +1,19 @@
 package org.kiegroup.kogito.serverless.service.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
 import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import io.quarkus.runtime.StartupEvent;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.kie.api.definition.process.Process;
 import org.kiegroup.kogito.serverless.model.Graph;
+import org.kiegroup.kogito.serverless.service.WorkflowProvider;
 import org.kiegroup.kogito.serverless.service.WorkflowService;
 import org.serverless.workflow.api.Workflow;
-import org.serverless.workflow.api.mapper.WorkflowObjectMapper;
-import org.serverless.workflow.api.validation.ValidationError;
-import org.serverless.workflow.api.validation.WorkflowValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,40 +22,50 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     private static final Logger logger = LoggerFactory.getLogger(WorkflowServiceImpl.class);
 
-    private static final String ENV_PROCESS_SOURCE = "process-source";
-    private static final String ENV_FILE_WORKFLOW_PATH = "workflow-path";
-    private static final String SOURCE_FILE = "file";
-    private static final String SOURCE_K8S = "k8s";
+    private static final String ENV_WORKFLOW_SOURCE = "workflow-source";
+    private static final String ENV_WORKFLOW_NAME = "workflow-name";
 
     private Workflow workflow;
     private Graph graph;
     private Process process;
     private String processId;
-    private final WorkflowObjectMapper mapper = new WorkflowObjectMapper();
+
+    @Inject
+    @Named(KubernetesProviderImpl.SOURCE)
+    WorkflowProvider k8sProvider;
+
+    @Inject
+    @Named(FileWorkflowProviderImpl.SOURCE)
+    WorkflowProvider fileProvider;
 
     @ConfigProperty(
-        name = ENV_PROCESS_SOURCE,
-        defaultValue = SOURCE_FILE
+        name = ENV_WORKFLOW_SOURCE,
+        defaultValue = FileWorkflowProviderImpl.SOURCE
     )
-    String processSource;
+    String workflowSource;
 
-    @ConfigProperty(name = ENV_FILE_WORKFLOW_PATH)
-    Optional<String> filePath;
+    @ConfigProperty(name = ENV_WORKFLOW_NAME)
+    Optional<String> workflowName;
 
     void onInit(@Observes StartupEvent event) {
-        switch (processSource) {
-            case SOURCE_FILE:
-                setFileBasedWorkflow();
+        Workflow workflow = null;
+        if (!workflowName.isPresent()) {
+            throw new IllegalArgumentException("Missing required environment variable: " + ENV_WORKFLOW_NAME);
+        }
+        switch (workflowSource) {
+            case FileWorkflowProviderImpl.SOURCE:
+                workflow = fileProvider.get(workflowName.get());
                 break;
-            case SOURCE_K8S:
-                setK8sBasedWorkflow();
+            case KubernetesProviderImpl.SOURCE:
+                workflow = k8sProvider.get(workflowName.get());
                 break;
             default:
-                throw new IllegalArgumentException("Unsupported process source configured: " + processSource);
+                throw new IllegalArgumentException("Unsupported process source configured: " + workflowSource);
         }
         if (workflow == null) {
             throw new IllegalStateException("Unable to load a valid process definition");
         }
+        updateWorkflow(workflow);
     }
 
     @Override
@@ -78,28 +83,6 @@ public class WorkflowServiceImpl implements WorkflowService {
         return processId;
     }
 
-    private void setFileBasedWorkflow() {
-        if (!filePath.isPresent()) {
-            throw new IllegalArgumentException("Missing required environment variable for File based workflow definition: " + ENV_FILE_WORKFLOW_PATH);
-        }
-        Workflow workflow = null;
-        try {
-            byte[] file = Files.readAllBytes(Paths.get(filePath.get()));
-            workflow = mapper.readValue(new ByteArrayInputStream(file), Workflow.class);
-            updateWorkflow(workflow);
-        } catch (IOException e) {
-            logger.error("Unable to read provided workflow", e);
-        }
-        if (workflow != null) {
-            List<ValidationError> validationErrors = new WorkflowValidator().forWorkflow(workflow).validate();
-            if (!validationErrors.isEmpty()) {
-                updateWorkflow(workflow);
-            } else {
-                logger.warn("Workflow not updated. Provided workflow has validation errors: {}", validationErrors);
-            }
-        }
-    }
-
     private void updateWorkflow(Workflow workflow) {
         this.workflow = workflow;
         this.graph = new Graph(workflow);
@@ -107,8 +90,4 @@ public class WorkflowServiceImpl implements WorkflowService {
         this.processId = graph.getProcessName();
     }
 
-    private void setK8sBasedWorkflow() {
-        //TODO: Implement K8S Source
-        throw new UnsupportedOperationException("Not implemented");
-    }
 }
